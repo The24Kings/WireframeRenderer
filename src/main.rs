@@ -57,8 +57,8 @@ pub fn main() {
             gc.clear_canvas(Color::Rgba(0.0, 0.0, 0.0, 1.0));
         });
 
-        let vs = Penger::vertices().expect("No vertices found.");
-        let fs = Penger::indices().expect("No indices found.");
+        let vs = Cube::vertices().expect("No vertices found.");
+        let fs = Cube::indices().expect("No indices found.");
 
         // Animate them
         let dz = 1.0;
@@ -66,19 +66,18 @@ pub fn main() {
 
         loop {
             // dz += 1.0 * DELTA_TIME;
-            angle += f32::consts::PI * constants::DELTA_TIME;
+            angle += 50.0 * f32::consts::PI * constants::DELTA_TIME;
 
             clear(LayerId(0), &canvas);
 
-            // Render all the vertices
-            for v in vs.iter() {
-                v.rotate_y(150.0)
-                    .rotate_x(-15.0)
-                    .translate_z(dz)
-                    .project()
-                    .screen()
-                    .point(&canvas);
-            }
+            // // Render all the vertices
+            // for v in vs.iter() {
+            //     v.rotate_y(angle)
+            //         .translate_z(dz)
+            //         .project()
+            //         .screen()
+            //         .point(&canvas);
+            // }
 
             // Render wireframe
             for f in &fs {
@@ -87,15 +86,15 @@ pub fn main() {
                     let b = &vs[f[(i + 1) % f.len()]]; // Wrap around
 
                     line(
-                        &a.rotate_y(150.0)
-                            .rotate_x(-15.0)
+                        &a.rotate_y(angle)
+                            .rotate_x(15.0)
                             .translate_z(dz)
-                            .project()
+                            .ortho()
                             .screen(),
-                        &b.rotate_y(150.0)
-                            .rotate_x(-15.0)
+                        &b.rotate_y(angle)
+                            .rotate_x(15.0)
                             .translate_z(dz)
-                            .project()
+                            .ortho()
                             .screen(),
                         &canvas,
                     )

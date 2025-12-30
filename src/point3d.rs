@@ -74,4 +74,8 @@ impl Point3D {
             _ => Point2D::new(self.x / self.z, self.y / self.z),
         }
     }
+
+    pub fn ortho(&self) -> Point2D {
+        Point2D::new(self.x, self.y)
+    }
 }
