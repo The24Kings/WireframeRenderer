@@ -7,8 +7,8 @@ use std::sync::OnceLock;
 use std::thread;
 use std::time::Duration;
 
-static CANVAS_HEIGHT: f32 = 800.0;
-static CANVAS_WIDTH: f32 = 800.0;
+const CANVAS_HEIGHT: f32 = 800.0;
+const CANVAS_WIDTH: f32 = 800.0;
 
 static COLOR: OnceLock<Color> = OnceLock::new();
 
@@ -36,12 +36,9 @@ impl Point2D {
     }
 
     pub fn screen(&self) -> Point2D {
-        let half_width = CANVAS_WIDTH / 2.0;
-        let half_height = CANVAS_HEIGHT / 2.0;
-
         Point2D {
-            x: half_width + (half_width * self.x),
-            y: half_height + (half_height * self.y),
+            x: self.x * (CANVAS_WIDTH / 2.0),
+            y: self.y * (CANVAS_HEIGHT / 2.0),
         }
     }
 
@@ -89,17 +86,22 @@ pub fn clear(layer: LayerId, canvas: &DrawingTarget) {
         gc.layer(layer);
         gc.clear_layer();
         gc.canvas_height(CANVAS_HEIGHT);
-        gc.center_region(0.0, 0.0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         gc.new_path();
-        gc.rect(0.0, 0.0, CANVAS_HEIGHT, CANVAS_WIDTH);
+        gc.rect(
+            -(CANVAS_WIDTH / 2.0),
+            -(CANVAS_HEIGHT / 2.0),
+            CANVAS_WIDTH / 2.0,
+            CANVAS_HEIGHT / 2.0,
+        );
         gc.fill_color(boundary);
         gc.fill();
     });
 }
 
-static FPS: u64 = 64;
-static FRAME_TIME: u64 = 1_000_000_000 / FPS;
+const FPS: f32 = 60.0;
+const DELTA_TIME: f32 = 1.0 / FPS;
+const FRAME_TIME: u64 = 1_000_000_000 / FPS as u64;
 
 pub fn main() {
     // 'with_2d_graphics' is used to support operating systems that can't run event loops anywhere other than the main thread
@@ -112,22 +114,20 @@ pub fn main() {
             gc.clear_canvas(Color::Rgba(0.0, 0.0, 0.0, 1.0));
         });
 
-        // Set the boundary color
-        clear(LayerId(0), &canvas);
-
         // Animate them
-        const DELTA_TIME: f32 = 1.0 / FPS as f32;
         let mut dz = 0.0;
 
         loop {
             dz += 1.0 * DELTA_TIME;
 
-            clear(LayerId(1), &canvas);
+            clear(LayerId(0), &canvas);
 
             Point3D::new(0.5, 0.0, 1.0 + dz)
                 .project()
                 .screen()
                 .draw(&canvas);
+
+            // Point2D::new(1.0, 0.5).screen().draw(&canvas);
 
             // Wait for the next frame
             thread::sleep(Duration::from_nanos(FRAME_TIME));
