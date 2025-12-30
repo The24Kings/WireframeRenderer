@@ -80,7 +80,18 @@ impl Point3D {
         }
     }
 
-    pub fn rotate_xz(&self, angle: f32) -> Self {
+    pub fn rotate_x(&self, angle: f32) -> Self {
+        let c = f32::cos(angle);
+        let s = f32::sin(angle);
+
+        Self {
+            x: self.x,
+            y: self.y * c - self.z * s,
+            z: self.y * s + self.z * c,
+        }
+    }
+
+    pub fn rotate_y(&self, angle: f32) -> Self {
         let c = f32::cos(angle);
         let s = f32::sin(angle);
 
@@ -88,6 +99,17 @@ impl Point3D {
             x: self.x * c - self.z * s,
             y: self.y,
             z: self.x * s + self.z * c,
+        }
+    }
+
+    pub fn rotate_z(&self, angle: f32) -> Self {
+        let c = f32::cos(angle);
+        let s = f32::sin(angle);
+
+        Self {
+            x: self.x * c - self.y * s,
+            y: self.x * s + self.y * c,
+            z: self.z,
         }
     }
 
@@ -180,13 +202,13 @@ pub fn main() {
 
             clear(LayerId(0), &canvas);
 
-            for v in vs.iter() {
-                v.rotate_xz(angle)
-                    .translate_z(dz)
-                    .project()
-                    .screen()
-                    .draw(&canvas);
-            }
+            // for v in vs.iter() {
+            //     v.rotate_xy(angle)
+            //         .translate_z(dz)
+            //         .project()
+            //         .screen()
+            //         .draw(&canvas);
+            // }
 
             for f in &fs {
                 for i in 0..f.len() {
@@ -194,8 +216,18 @@ pub fn main() {
                     let b = &vs[f[(i + 1) % f.len()]]; // Wrap around
 
                     line(
-                        &a.rotate_xz(angle).translate_z(dz).project().screen(),
-                        &b.rotate_xz(angle).translate_z(dz).project().screen(),
+                        &a.rotate_x(angle)
+                            .rotate_y(angle)
+                            .rotate_z(angle)
+                            .translate_z(dz)
+                            .project()
+                            .screen(),
+                        &b.rotate_x(angle)
+                            .rotate_y(angle)
+                            .rotate_z(angle)
+                            .translate_z(dz)
+                            .project()
+                            .screen(),
                         &canvas,
                     )
                 }
