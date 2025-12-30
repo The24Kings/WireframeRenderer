@@ -36,8 +36,8 @@ impl Point3D {
     }
 
     pub fn rotate_x(&self, angle: f32) -> Self {
-        let c = f32::cos(angle);
-        let s = f32::sin(angle);
+        let c = f32::cos(angle.to_radians());
+        let s = f32::sin(angle.to_radians());
 
         Self {
             x: self.x,
@@ -47,8 +47,8 @@ impl Point3D {
     }
 
     pub fn rotate_y(&self, angle: f32) -> Self {
-        let c = f32::cos(angle);
-        let s = f32::sin(angle);
+        let c = f32::cos(angle.to_radians());
+        let s = f32::sin(angle.to_radians());
 
         Self {
             x: self.x * c - self.z * s,
@@ -58,8 +58,8 @@ impl Point3D {
     }
 
     pub fn rotate_z(&self, angle: f32) -> Self {
-        let c = f32::cos(angle);
-        let s = f32::sin(angle);
+        let c = f32::cos(angle.to_radians());
+        let s = f32::sin(angle.to_radians());
 
         Self {
             x: self.x * c - self.y * s,
