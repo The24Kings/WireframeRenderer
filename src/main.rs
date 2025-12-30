@@ -27,6 +27,14 @@ pub fn line(p1: &Point2D, p2: &Point2D, canvas: &DrawingTarget) {
 }
 
 pub fn clear(layer: LayerId, canvas: &DrawingTarget) {
+    canvas.draw(|gc| {
+        gc.layer(layer);
+        gc.clear_layer();
+        gc.canvas_height(CANVAS_HEIGHT);
+    });
+}
+
+pub fn set_boundary(layer: LayerId, canvas: &DrawingTarget) {
     let boundary = Color::Rgba(0.2, 0.2, 0.2, 1.0);
 
     canvas.draw(|gc| {
@@ -46,6 +54,7 @@ pub fn clear(layer: LayerId, canvas: &DrawingTarget) {
     });
 }
 
+// Inspired by Tsoding: https://github.com/tsoding/formula
 pub fn main() {
     // 'with_2d_graphics' is used to support operating systems that can't run event loops anywhere other than the main thread
     with_2d_graphics(|| {
@@ -57,6 +66,9 @@ pub fn main() {
             gc.clear_canvas(Color::Rgba(0.0, 0.0, 0.0, 1.0));
         });
 
+        set_boundary(LayerId(0), &canvas);
+
+        // If you want to see Penger, replace "Cube" with "Penger" or add your own shape in the shape folder
         let vs = Cube::vertices().expect("No vertices found.");
         let fs = Cube::indices().expect("No indices found.");
 
@@ -68,16 +80,19 @@ pub fn main() {
             // dz += 1.0 * DELTA_TIME;
             angle += 50.0 * f32::consts::PI * constants::DELTA_TIME;
 
-            clear(LayerId(0), &canvas);
+            clear(LayerId(1), &canvas);
 
             // // Render all the vertices
             // for v in vs.iter() {
             //     v.rotate_y(angle)
+            //         .rotate_x(-15.0)
             //         .translate_z(dz)
             //         .project()
             //         .screen()
             //         .point(&canvas);
             // }
+
+            // TODO: It would be funny if it followed the mouse lol
 
             // Render wireframe
             for f in &fs {
@@ -86,16 +101,8 @@ pub fn main() {
                     let b = &vs[f[(i + 1) % f.len()]]; // Wrap around
 
                     line(
-                        &a.rotate_y(angle)
-                            .rotate_x(15.0)
-                            .translate_z(dz)
-                            .ortho()
-                            .screen(),
-                        &b.rotate_y(angle)
-                            .rotate_x(15.0)
-                            .translate_z(dz)
-                            .ortho()
-                            .screen(),
+                        &a.rotate_y(angle).translate_z(dz).project().screen(),
+                        &b.rotate_y(angle).translate_z(dz).project().screen(),
                         &canvas,
                     )
                 }
