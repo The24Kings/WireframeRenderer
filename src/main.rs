@@ -99,6 +99,18 @@ impl Point3D {
     }
 }
 
+pub fn line(p1: &Point2D, p2: &Point2D, canvas: &DrawingTarget) {
+    canvas.draw(|gc| {
+        gc.stroke_color(get_color().to_owned());
+        gc.line_width(2.0);
+
+        gc.new_path();
+        gc.move_to(p1.x, p1.y);
+        gc.line_to(p2.x, p2.y);
+        gc.stroke();
+    });
+}
+
 pub fn clear(layer: LayerId, canvas: &DrawingTarget) {
     let boundary = Color::Rgba(0.2, 0.2, 0.2, 1.0);
 
@@ -147,6 +159,17 @@ pub fn main() {
             Point3D::new(0.25, -0.25, -0.25),
         ];
 
+        let fs = vec![
+            vec![0, 1, 2, 3], // Back
+            vec![4, 5, 6, 7], // Front
+            vec![0, 4],       // Top Right
+            vec![1, 5],       // Top Left
+            vec![2, 6],       // Bottom Left
+            vec![3, 7],       // Bottom Right
+        ];
+
+        // let fs: Vec<usize> = fs.into_iter().flatten().collect();
+
         // Animate them
         let dz = 1.0;
         let mut angle = 0.0;
@@ -160,9 +183,22 @@ pub fn main() {
             for v in vs.iter() {
                 v.rotate_xz(angle)
                     .translate_z(dz)
-                .project()
-                .screen()
-                .draw(&canvas);
+                    .project()
+                    .screen()
+                    .draw(&canvas);
+            }
+
+            for f in &fs {
+                for i in 0..f.len() {
+                    let a = &vs[f[i]];
+                    let b = &vs[f[(i + 1) % f.len()]]; // Wrap around
+
+                    line(
+                        &a.rotate_xz(angle).translate_z(dz).project().screen(),
+                        &b.rotate_xz(angle).translate_z(dz).project().screen(),
+                        &canvas,
+                    )
+                }
             }
 
             // Point2D::new(1.0, 0.25).screen().draw(&canvas);
