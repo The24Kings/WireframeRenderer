@@ -20,18 +20,12 @@ impl Point2D {
         }
     }
 
-    pub fn draw(&self, canvas: &DrawingTarget) {
-        let size = 16.0;
-        let center = size / 2.0;
+    pub fn point(&self, canvas: &DrawingTarget) {
+        let radius = 4.0;
 
         canvas.draw(|gc| {
             gc.new_path();
-            gc.rect(
-                self.x - center,
-                self.y - center,
-                self.x - center + size,
-                self.y - center + size,
-            );
+            gc.circle(self.x, self.y, radius);
             gc.fill_color(color::get_color().to_owned());
             gc.fill();
         });

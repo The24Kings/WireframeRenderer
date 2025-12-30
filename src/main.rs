@@ -70,22 +70,33 @@ pub fn main() {
 
             clear(LayerId(0), &canvas);
 
-            // for v in vs.iter() {
-            //     v.rotate_xy(angle)
-            //         .translate_z(dz)
-            //         .project()
-            //         .screen()
-            //         .draw(&canvas);
-            // }
+            // Render all the vertices
+            for v in vs.iter() {
+                v.rotate_y(150.0)
+                    .rotate_x(-15.0)
+                    .translate_z(dz)
+                    .project()
+                    .screen()
+                    .point(&canvas);
+            }
 
+            // Render wireframe
             for f in &fs {
                 for i in 0..f.len() {
                     let a = &vs[f[i]];
                     let b = &vs[f[(i + 1) % f.len()]]; // Wrap around
 
                     line(
-                        &a.rotate_y(180.0).translate_z(dz).project().screen(),
-                        &b.rotate_y(180.0).translate_z(dz).project().screen(),
+                        &a.rotate_y(150.0)
+                            .rotate_x(-15.0)
+                            .translate_z(dz)
+                            .project()
+                            .screen(),
+                        &b.rotate_y(150.0)
+                            .rotate_x(-15.0)
+                            .translate_z(dz)
+                            .project()
+                            .screen(),
                         &canvas,
                     )
                 }
