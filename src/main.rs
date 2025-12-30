@@ -45,17 +45,17 @@ impl Point {
         }
     }
 
+    fn project(&mut self) -> Self {
+        todo!();
+    }
+
+    fn screen(&mut self) -> Self {
+        todo!();
+    }
+
     pub fn update(&mut self, dt: f32) {
         todo!();
     }
-}
-
-fn project(point: &Point) -> Point {
-    todo!();
-}
-
-fn screen(point: &Point) -> Point {
-    todo!();
 }
 
 ///
@@ -89,7 +89,7 @@ pub fn main() {
         });
 
         // Generate some random balls
-        let points = (0..1) // TODO: Load vertices
+        let mut points = (0..1) // TODO: Load vertices
             .into_iter()
             .map(|_| Point::new(CANVAS_WIDTH / 2.0, CANVAS_HEIGHT / 2.0))
             .collect::<Vec<_>>();
@@ -108,9 +108,9 @@ pub fn main() {
                 gc.canvas_height(CANVAS_HEIGHT);
                 gc.center_region(0.0, 0.0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-                for pnt in points.iter() {
-                    // // 3D to 2D shenanigans
-                    // let pnt = screen(&project(&pnt));
+                for pnt in points.iter_mut() {
+                    // 3D to 2D shenanigans
+                    pnt.project().screen();
 
                     // Draw the point
                     gc.new_path();
