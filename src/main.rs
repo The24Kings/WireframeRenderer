@@ -72,6 +72,22 @@ impl Point3D {
         Self { x, y, z }
     }
 
+    pub fn translate_x(&self, delta: f32) -> Self {
+        Self {
+            x: self.x + delta,
+            y: self.y,
+            z: self.z,
+        }
+    }
+
+    pub fn translate_y(&self, delta: f32) -> Self {
+        Self {
+            x: self.x,
+            y: self.y + delta,
+            z: self.z,
+        }
+    }
+
     pub fn translate_z(&self, delta: f32) -> Self {
         Self {
             x: self.x,
