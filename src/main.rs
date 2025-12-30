@@ -10,8 +10,6 @@ use std::time::Duration;
 static CANVAS_HEIGHT: f32 = 800.0;
 static CANVAS_WIDTH: f32 = 800.0;
 
-static FPS: u64 = 64;
-static DELTA_TIME: u64 = 1_000_000_000 / FPS;
 static COLOR: OnceLock<Color> = OnceLock::new();
 
 fn get_color<'a>() -> &'a Color {
@@ -27,49 +25,90 @@ fn get_color<'a>() -> &'a Color {
     })
 }
 
-struct Point {
-    size: f32,
+pub struct Point2D {
     x: f32,
     y: f32,
 }
 
-impl Point {
-    pub fn new(x: f32, y: f32) -> Point {
-        let size = 16.0;
+impl Point2D {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
 
-        // Correct the coordinate system so that (0, 0) is at the top left of the canvas
-        Self {
-            size,
-            x: x - (size / 2.0),
-            y: ((CANVAS_HEIGHT - size) - y) + (size / 2.0),
+    fn screen(&self) -> Point2D {
+        let half_width = CANVAS_WIDTH / 2.0;
+        let half_height = CANVAS_HEIGHT / 2.0;
+
+        Point2D {
+            x: half_width + (half_width * self.x),
+            y: half_height + (half_height * self.y),
         }
     }
 
-    fn project(&mut self) -> Self {
-        todo!();
-    }
+    pub fn draw(&self, canvas: &DrawingTarget) {
+        let size = 16.0;
+        let center = size / 2.0;
 
-    fn screen(&mut self) -> Self {
-        todo!();
-    }
-
-    pub fn update(&mut self, dt: f32) {
-        todo!();
+        canvas.draw(|gc| {
+            gc.new_path();
+            gc.rect(
+                self.x - center,
+                self.y - center,
+                self.x - center + size,
+                self.y - center + size,
+            );
+            gc.fill_color(get_color().to_owned());
+            gc.fill();
+        });
     }
 }
 
-///
-/// Bouncing ball example that uses sprites to improve performance
-///
-/// bounce.rs renders the paths every frame, so each circle has to be re-tessellated every time. This uses
-/// sprites so that the paths are only tessellated once, which reduces the CPU requirements considerably.
-///
+pub struct Point3D {
+    x: f32,
+    y: f32,
+    z: f32,
+}
+
+impl Point3D {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
+        Self { x, y, z }
+    }
+
+    fn project(&self) -> Point2D {
+        match self.z {
+            0.0 => Point2D { x: 0.0, y: 0.0 },
+            _ => Point2D {
+                x: self.x / self.z,
+                y: self.y / self.z,
+            },
+        }
+    }
+}
+
+pub fn clear(layer: LayerId, canvas: &DrawingTarget) {
+    let boundary = Color::Rgba(0.2, 0.2, 0.2, 1.0);
+
+    canvas.draw(|gc| {
+        gc.layer(layer);
+        gc.clear_layer();
+        gc.canvas_height(CANVAS_HEIGHT);
+        gc.center_region(0.0, 0.0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        gc.new_path();
+        gc.rect(0.0, 0.0, CANVAS_HEIGHT, CANVAS_WIDTH);
+        gc.fill_color(boundary);
+        gc.fill();
+    });
+}
+
+static FPS: u64 = 64;
+static FRAME_TIME: u64 = 1_000_000_000 / FPS;
+
 pub fn main() {
     // 'with_2d_graphics' is used to support operating systems that can't run event loops anywhere other than the main thread
     with_2d_graphics(|| {
         // Create a window with a canvas to draw on
         let canvas = create_drawing_window("Wireframe Renderer");
-        let boundary = Color::Rgba(0.2, 0.2, 0.2, 1.0);
 
         // Clear the canvas to set a background color
         canvas.draw(|gc| {
@@ -77,51 +116,24 @@ pub fn main() {
         });
 
         // Set the boundary color
-        canvas.draw(|gc| {
-            gc.layer(LayerId(0));
-            gc.clear_layer();
-            gc.canvas_height(CANVAS_HEIGHT);
-            gc.center_region(0.0, 0.0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            gc.new_path();
-            gc.rect(0.0, 0.0, CANVAS_HEIGHT, CANVAS_WIDTH);
-            gc.fill_color(boundary);
-            gc.fill();
-        });
-
-        // Generate some random balls
-        let mut points = (0..1) // TODO: Load vertices
-            .into_iter()
-            .map(|_| Point::new(CANVAS_WIDTH / 2.0, CANVAS_HEIGHT / 2.0))
-            .collect::<Vec<_>>();
+        clear(LayerId(0), &canvas);
 
         // Animate them
+        const DELTA_TIME: f32 = 1.0 / FPS as f32;
+        let mut dz = 0.0;
+
         loop {
-            // // Update the balls for this frame
-            // for pnt in points.iter_mut() {
-            //     pnt.update();
-            // }
+            dz += 1.0 * DELTA_TIME;
 
-            // Render the frame on layer 1
-            canvas.draw(|gc| {
-                gc.layer(LayerId(1));
-                gc.clear_layer();
-                gc.canvas_height(CANVAS_HEIGHT);
-                gc.center_region(0.0, 0.0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            clear(LayerId(1), &canvas);
 
-                for pnt in points.iter_mut() {
-                    // 3D to 2D shenanigans
-                    pnt.project().screen();
-
-                    // Draw the point
-                    gc.new_path();
-                    gc.rect(pnt.x, pnt.y, pnt.x + pnt.size, pnt.y + pnt.size);
-                    gc.fill_color(get_color().to_owned());
-                    gc.fill();
-                }
-            });
+            Point3D::new(0.5, 0.0, 1.0 + dz)
+                .project()
+                .screen()
+                .draw(&canvas);
 
             // Wait for the next frame
-            thread::sleep(Duration::from_nanos(DELTA_TIME));
+            thread::sleep(Duration::from_nanos(FRAME_TIME));
         }
     });
 }
