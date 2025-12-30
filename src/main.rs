@@ -4,11 +4,9 @@ use flo_draw::*;
 use std::thread;
 use std::time::Duration;
 
-use crate::{
-    constants::{CANVAS_HEIGHT, CANVAS_WIDTH},
-    point2d::Point2D,
-    shape::{Shape as _, cube::Cube},
-};
+use crate::constants::{CANVAS_HEIGHT, CANVAS_WIDTH};
+use crate::point2d::Point2D;
+use crate::shape::{Shape as _, cube::Cube, penger::Penger};
 
 pub mod color;
 pub mod constants;
@@ -59,8 +57,8 @@ pub fn main() {
             gc.clear_canvas(Color::Rgba(0.0, 0.0, 0.0, 1.0));
         });
 
-        let vs = Cube::vertices().expect("No vertices found.");
-        let fs = Cube::indices().expect("No indices found.");
+        let vs = Penger::vertices().expect("No vertices found.");
+        let fs = Penger::indices().expect("No indices found.");
 
         // Animate them
         let dz = 1.0;
@@ -86,24 +84,12 @@ pub fn main() {
                     let b = &vs[f[(i + 1) % f.len()]]; // Wrap around
 
                     line(
-                        &a.rotate_x(angle)
-                            .rotate_y(angle)
-                            .rotate_z(angle)
-                            .translate_z(dz)
-                            .project()
-                            .screen(),
-                        &b.rotate_x(angle)
-                            .rotate_y(angle)
-                            .rotate_z(angle)
-                            .translate_z(dz)
-                            .project()
-                            .screen(),
+                        &a.rotate_y(180.0).translate_z(dz).project().screen(),
+                        &b.rotate_y(180.0).translate_z(dz).project().screen(),
                         &canvas,
                     )
                 }
             }
-
-            // Point2D::new(1.0, 0.25).screen().draw(&canvas);
 
             // Wait for the next frame
             thread::sleep(Duration::from_nanos(constants::FRAME_TIME));

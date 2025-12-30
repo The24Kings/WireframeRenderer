@@ -1,6 +1,7 @@
 use crate::point3d::Point3D;
 
 pub mod cube;
+pub mod penger;
 
 pub trait Shape {
     fn vertices() -> Option<Vec<Point3D>> {

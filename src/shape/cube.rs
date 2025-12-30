@@ -1,8 +1,8 @@
-use crate::{point3d::Point3D, shape::Shape};
+use crate::point3d::Point3D;
 
 pub struct Cube;
 
-impl Shape for Cube {
+impl super::Shape for Cube {
     fn vertices() -> Option<Vec<crate::point3d::Point3D>> {
         Some(vec![
             // Back Face
