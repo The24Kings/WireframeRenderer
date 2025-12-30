@@ -3,6 +3,7 @@ use flo_draw::*;
 
 use rand::*;
 
+use core::f32;
 use std::sync::OnceLock;
 use std::thread;
 use std::time::Duration;
@@ -25,7 +26,7 @@ fn get_color<'a>() -> &'a Color {
     })
 }
 
-struct Point2D {
+pub struct Point2D {
     x: f32,
     y: f32,
 }
@@ -60,7 +61,7 @@ impl Point2D {
     }
 }
 
-struct Point3D {
+pub struct Point3D {
     x: f32,
     y: f32,
     z: f32,
@@ -69,6 +70,25 @@ struct Point3D {
 impl Point3D {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn translate_z(&self, delta: f32) -> Self {
+        Self {
+            x: self.x,
+            y: self.y,
+            z: self.z + delta,
+        }
+    }
+
+    pub fn rotate_xz(&self, angle: f32) -> Self {
+        let c = f32::cos(angle);
+        let s = f32::sin(angle);
+
+        Self {
+            x: self.x * c - self.z * s,
+            y: self.y,
+            z: self.x * s + self.z * c,
+        }
     }
 
     fn project(&self) -> Point2D {
@@ -114,20 +134,38 @@ pub fn main() {
             gc.clear_canvas(Color::Rgba(0.0, 0.0, 0.0, 1.0));
         });
 
+        let vs = vec![
+            // Back Face
+            Point3D::new(0.25, 0.25, 0.25),
+            Point3D::new(-0.25, 0.25, 0.25),
+            Point3D::new(-0.25, -0.25, 0.25),
+            Point3D::new(0.25, -0.25, 0.25),
+            // Front Face
+            Point3D::new(0.25, 0.25, -0.25),
+            Point3D::new(-0.25, 0.25, -0.25),
+            Point3D::new(-0.25, -0.25, -0.25),
+            Point3D::new(0.25, -0.25, -0.25),
+        ];
+
         // Animate them
-        let mut dz = 0.0;
+        let dz = 1.0;
+        let mut angle = 0.0;
 
         loop {
-            dz += 1.0 * DELTA_TIME;
+            // dz += 1.0 * DELTA_TIME;
+            angle += f32::consts::PI * DELTA_TIME;
 
             clear(LayerId(0), &canvas);
 
-            Point3D::new(0.5, 0.0, 1.0 + dz)
+            for v in vs.iter() {
+                v.rotate_xz(angle)
+                    .translate_z(dz)
                 .project()
                 .screen()
                 .draw(&canvas);
+            }
 
-            // Point2D::new(1.0, 0.5).screen().draw(&canvas);
+            // Point2D::new(1.0, 0.25).screen().draw(&canvas);
 
             // Wait for the next frame
             thread::sleep(Duration::from_nanos(FRAME_TIME));
