@@ -25,7 +25,7 @@ fn get_color<'a>() -> &'a Color {
     })
 }
 
-pub struct Point2D {
+struct Point2D {
     x: f32,
     y: f32,
 }
@@ -35,7 +35,7 @@ impl Point2D {
         Self { x, y }
     }
 
-    fn screen(&self) -> Point2D {
+    pub fn screen(&self) -> Point2D {
         let half_width = CANVAS_WIDTH / 2.0;
         let half_height = CANVAS_HEIGHT / 2.0;
 
@@ -63,7 +63,7 @@ impl Point2D {
     }
 }
 
-pub struct Point3D {
+struct Point3D {
     x: f32,
     y: f32,
     z: f32,
@@ -76,11 +76,8 @@ impl Point3D {
 
     fn project(&self) -> Point2D {
         match self.z {
-            0.0 => Point2D { x: 0.0, y: 0.0 },
-            _ => Point2D {
-                x: self.x / self.z,
-                y: self.y / self.z,
-            },
+            0.0 => Point2D::new(0.0, 0.0),
+            _ => Point2D::new(self.x / self.z, self.y / self.z),
         }
     }
 }
