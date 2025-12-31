@@ -10,6 +10,7 @@ dependencies = [
  "flo_draw",
  "flo_render",
  "rand",
+ "rayon",
 ]
 
 [[package]]

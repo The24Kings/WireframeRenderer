@@ -3,6 +3,7 @@ use flo_canvas::{DrawingTarget, GraphicsContext as _, GraphicsPrimitives as _};
 use crate::color;
 use crate::constants::{CANVAS_HEIGHT, CANVAS_WIDTH};
 
+#[derive(Clone)]
 pub struct Point2D {
     pub x: f32,
     pub y: f32,
